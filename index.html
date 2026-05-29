@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bioprocess Digital Twin Deployment Readiness Toolkit</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-grid">
+        <div class="header-copy">
+          <div class="brand-logo-card" aria-label="University of Nottingham">
+            <img src="assets/university-of-nottingham-logo.png" alt="University of Nottingham logo">
+          </div>
+          <p class="eyebrow">TRL-DRL-α framework</p>
+          <h1>Bioprocess Digital Twin Deployment Readiness Toolkit</h1>
+          <p class="subtitle">
+            A TRL-DRL-α framework for identifying the digital twin role ceiling in bioprocesses.
+          </p>
+          <p class="intro">
+            This toolkit helps evaluators identify whether a bioprocess is currently best suited to offline analysis,
+            online monitoring and soft sensing, or advisory/closed-loop digital twin deployment.
+          </p>
+          <address class="author-block" aria-label="Author information">
+            <strong>Chengwan Bai<sup>1</sup>, Rachel L Gomes<sup>1</sup>, Oliver J Fisher<sup>1</sup>*</strong>
+            <span><sup>1</sup>Food Water Waste Research Group, Faculty of Engineering, University of Nottingham, University Park, NG7 2RD, UK</span>
+            <span>*Corresponding author: <a href="mailto:Oliver.Fisher2@nottingham.ac.uk">Oliver.Fisher2@nottingham.ac.uk</a></span>
+          </address>
+        </div>
+        <figure class="role-graphic-panel" aria-label="Digital twin role overview">
+          <img src="assets/role-ceiling-overview.png" alt="Diagram introducing digital twin role categories">
+        </figure>
+      </div>
+    </header>
+
+    <main class="container page-layout">
+      <section class="summary-panel" aria-labelledby="framework-summary-title">
+        <h2 id="framework-summary-title">Framework Summary</h2>
+        <div class="summary-grid">
+          <article>
+            <h3>TRL</h3>
+            <p>Technology maturity and the feasible deployment boundary.</p>
+          </article>
+          <article>
+            <h3>DRL</h3>
+            <p>Data maturity and evidential confidence for the assigned role.</p>
+          </article>
+          <article>
+            <h3>α</h3>
+            <p>Alignment among technology, data, model, and the operational task.</p>
+          </article>
+          <article>
+            <h3>Role ceiling</h3>
+            <p>Current defensible DT role, not theoretical future potential.</p>
+          </article>
+        </div>
+      </section>
+
+      <div id="configWarnings" class="warning-stack" aria-live="polite"></div>
+
+      <section class="input-grid" aria-label="Assessment inputs">
+        <article class="card">
+          <div class="card-heading">
+            <div>
+              <h2>Technology Readiness Level</h2>
+              <p>TRL defines the feasible deployment boundary.</p>
+            </div>
+          </div>
+          <label for="trlSelect">Select TRL</label>
+          <select id="trlSelect">
+            <option value="">Choose TRL</option>
+          </select>
+          <div id="trlDescription" class="selection-description" aria-live="polite"></div>
+        </article>
+
+        <article class="card">
+          <div class="card-heading">
+            <div>
+              <h2>Data Readiness Level</h2>
+              <p>DRL defines the confidence of the role assignment.</p>
+            </div>
+          </div>
+          <label for="drlSelect">Select DRL</label>
+          <select id="drlSelect">
+            <option value="">Choose DRL</option>
+          </select>
+          <div id="drlDescription" class="selection-description" aria-live="polite"></div>
+        </article>
+      </section>
+
+      <section class="alpha-section" aria-labelledby="alpha-title">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow dark">Alignment scoring</p>
+            <h2 id="alpha-title">α Sub-Criteria</h2>
+          </div>
+          <p>Choose one anchor score for each criterion. Scores update the result automatically.</p>
+        </div>
+        <div id="alphaCriteria" class="alpha-grid"></div>
+      </section>
+
+      <section class="results-section" aria-labelledby="results-title">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow dark">Assessment output</p>
+            <h2 id="results-title">Result</h2>
+          </div>
+          <div class="control-row" aria-label="Assessment controls">
+            <button id="resetButton" type="button" class="button button-secondary">Reset assessment</button>
+            <button id="copyButton" type="button" class="button">Copy summary</button>
+            <button id="downloadButton" type="button" class="button">Download JSON result</button>
+          </div>
+        </div>
+        <div id="resultPanel" class="result-panel" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>
+          Structured academic assessment aid. Requires expert judgement, site-specific validation, safety assessment, and regulatory review.
+        </p>
+      </div>
+    </footer>
+
+    <script src="scoringConfig.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
