@@ -5,7 +5,7 @@ A static, GitHub Pages-ready tool for operationalising the TRL–DRL–α framew
 The tool reports the highest functional role supported at or below a stated target role. It does not calculate a composite readiness score.
 
 ## Assessment workflow
-
+ 
 The evaluator:
 
 1. defines the required operational task and target role; system boundary and operating envelope are recommended, while deployment setting, model configuration, and update/decision interval are optional;
