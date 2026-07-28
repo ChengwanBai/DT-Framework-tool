@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bioprocess Digital Twin Deployment Readiness Toolkit</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -20,7 +21,7 @@
           </p>
           <p class="intro">
             This toolkit helps evaluators identify whether a bioprocess is currently best suited to offline analysis,
-            online monitoring and soft sensing, or advisory/closed-loop digital twin deployment.
+            online monitoring and operator-supervised support, or automated closed-loop optimisation or control.
           </p>
           <address class="author-block" aria-label="Author information">
             <strong>Chengwan Bai<sup>1</sup>, Rachel L Gomes<sup>1</sup>, Oliver J Fisher<sup>1</sup>*</strong>
@@ -40,15 +41,15 @@
         <div class="summary-grid">
           <article>
             <h3>TRL</h3>
-            <p>Technology maturity and the feasible deployment boundary.</p>
+            <p>Technology maturity, process scale, and operating conditions covered by the assessment.</p>
           </article>
           <article>
-            <h3>DRL</h3>
-            <p>Data maturity and evidential confidence for the assigned role.</p>
+            <h3>DRL band</h3>
+            <p>Band C confirms availability, Band B supports R1–R2, and Band A is required for R3.</p>
           </article>
           <article>
             <h3>α</h3>
-            <p>Alignment among technology, data, model, and the operational task.</p>
+            <p>Eight individual alignment criteria tested against role-specific requirements.</p>
           </article>
           <article>
             <h3>Role ceiling</h3>
@@ -59,12 +60,72 @@
 
       <div id="configWarnings" class="warning-stack" aria-live="polite"></div>
 
+      <section class="summary-panel" aria-labelledby="specification-title">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow dark">Step 1</p>
+            <h2 id="specification-title">Assessment specification</h2>
+          </div>
+          <p>Operational task and target role are required. Boundary and envelope are recommended; other context fields are optional.</p>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="systemBoundary">System boundary <span class="field-status recommended">Recommended</span></label>
+            <input id="systemBoundary" type="text" placeholder="e.g. integrated digester, sensors, model and control interface">
+          </div>
+          <div class="field">
+            <label for="deploymentSetting">Deployment setting <span class="field-status optional">Optional</span></label>
+            <input id="deploymentSetting" type="text" placeholder="e.g. pilot plant, operational facility">
+          </div>
+          <div class="field">
+            <label for="operatingEnvelope">Operating envelope <span class="field-status recommended">Recommended</span></label>
+            <input id="operatingEnvelope" type="text" placeholder="e.g. covered feedstocks, loads and process states">
+          </div>
+          <div class="field">
+            <label for="operationalTask">Operational task <span class="field-status required">Required</span></label>
+            <input id="operationalTask" type="text" required aria-required="true" placeholder="e.g. online VFA prediction and operator alerting">
+          </div>
+          <div class="field">
+            <label for="modelConfiguration">Model configuration <span class="field-status optional">Optional</span></label>
+            <input id="modelConfiguration" type="text" placeholder="e.g. hybrid model updated every batch">
+          </div>
+          <div class="field">
+            <label for="decisionInterval">Update and decision interval <span class="field-status optional">Optional</span></label>
+            <input id="decisionInterval" type="text" placeholder="e.g. 5-minute update, 30-minute decision">
+          </div>
+          <div class="field">
+            <label for="targetRole">Target role <span class="field-status required">Required</span></label>
+            <select id="targetRole" required aria-required="true">
+              <option value="">Choose target role</option>
+              <option value="R1">R1 — Offline / open-loop support</option>
+              <option value="R2">R2 — Online / operator-supervised support</option>
+              <option value="R3">R3 — Automated optimisation or control</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="offlineTaskDemonstrated">Offline/open-loop task demonstrated?</label>
+            <select id="offlineTaskDemonstrated">
+              <option value="">Choose an answer</option>
+              <option value="yes">Yes — demonstrated within this boundary</option>
+              <option value="no">No — not yet demonstrated</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
       <section class="input-grid" aria-label="Assessment inputs">
+        <div class="section-title readiness-title">
+          <div>
+            <p class="eyebrow dark">Step 2</p>
+            <h2>Assign readiness</h2>
+          </div>
+          <p>Assign TRL to the integrated technical system and select the supported data-readiness evidence band.</p>
+        </div>
         <article class="card">
           <div class="card-heading">
             <div>
               <h2>Technology Readiness Level</h2>
-              <p>TRL defines the feasible deployment boundary.</p>
+              <p>TRL records maturity and the scale and conditions covered; component maturity alone is insufficient.</p>
             </div>
           </div>
           <label for="trlSelect">Select TRL</label>
@@ -77,25 +138,68 @@
         <article class="card">
           <div class="card-heading">
             <div>
-              <h2>Data Readiness Level</h2>
-              <p>DRL defines the confidence of the role assignment.</p>
+              <h2>Data Readiness Band</h2>
+              <p>Select the highest evidence band fully achieved for the specified task and boundary.</p>
             </div>
           </div>
-          <label for="drlSelect">Select DRL</label>
-          <select id="drlSelect">
-            <option value="">Choose DRL</option>
+          <p class="cumulative-note">
+            The bands are cumulative. Band A includes Bands B and C, and Band B includes Band C.
+          </p>
+          <label for="bandSelect">Select data readiness band</label>
+          <select id="bandSelect">
+            <option value="">Choose Band A, B, or C</option>
           </select>
-          <div id="drlDescription" class="selection-description" aria-live="polite"></div>
+          <div id="bandDescription" class="selection-description" aria-live="polite"></div>
         </article>
+      </section>
+
+      <section class="summary-panel" aria-labelledby="applicability-title">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow dark">Step 3</p>
+            <h2 id="applicability-title">Conditional criterion applicability</h2>
+          </div>
+          <p>
+            <span class="alpha-symbol">α<sub>TD2</sub></span> and
+            <span class="alpha-symbol">α<sub>TD3</sub></span> enter the role mapping when their stated conditions affect the task.
+            For R2, <span class="alpha-symbol">α<sub>MT</sub></span> enters the role mapping when model outputs guide process operation.
+          </p>
+        </div>
+        <div class="form-grid compact">
+          <div class="field">
+            <label for="feedstockVariability">Can feedstock or material variability affect the task?</label>
+            <select id="feedstockVariability">
+              <option value="">Choose an answer</option>
+              <option value="yes">Yes — include the feedstock-variability criterion</option>
+              <option value="no">No — keep it diagnostic only</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="spatialEffects">Can spatial, phase, scale, or unit differences affect the task?</label>
+            <select id="spatialEffects">
+              <option value="">Choose an answer</option>
+              <option value="yes">Yes — include the spatial and operational criterion</option>
+              <option value="no">No — keep it diagnostic only</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="operationGuidance">Are model outputs used to guide process operation?</label>
+            <select id="operationGuidance">
+              <option value="">Choose an answer</option>
+              <option value="yes">Yes — include the model–technology interface mean</option>
+              <option value="no">No — keep it diagnostic for R2</option>
+            </select>
+          </div>
+        </div>
       </section>
 
       <section class="alpha-section" aria-labelledby="alpha-title">
         <div class="section-title">
           <div>
-            <p class="eyebrow dark">Alignment scoring</p>
+            <p class="eyebrow dark">Step 4 · Alignment scoring</p>
             <h2 id="alpha-title">α Sub-Criteria</h2>
           </div>
-          <p>Choose one anchor score for each criterion. Scores update the result automatically.</p>
+          <p>Dimension means summarise each interface. R2 uses applicable dimension means together with a minimum criterion score; R3 requires all applicable criteria to reach 4.</p>
         </div>
         <div id="alphaCriteria" class="alpha-grid"></div>
       </section>
@@ -125,6 +229,7 @@
     </footer>
 
     <script src="scoringConfig.js"></script>
+    <script src="frameworkEngine.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

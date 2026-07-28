@@ -36,18 +36,21 @@ body {
 }
 
 button,
-select {
+select,
+input {
   font: inherit;
 }
 
 button,
 select,
+input,
 .rating-option {
   outline-offset: 3px;
 }
 
 button:focus-visible,
 select:focus-visible,
+input:focus-visible,
 .rating-option:focus-visible {
   outline: 3px solid #66a6ff;
 }
@@ -104,6 +107,7 @@ select:focus-visible,
 h1,
 h2,
 h3,
+h4,
 p {
   margin-top: 0;
 }
@@ -226,6 +230,55 @@ h3 {
   gap: 24px;
 }
 
+.readiness-title {
+  grid-column: 1 / -1;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.form-grid.compact {
+  margin-top: 14px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.field label {
+  min-height: 24px;
+}
+
+.field-status {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  margin-left: 5px;
+  padding: 2px 7px;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.field-status.required {
+  background: var(--blue-100);
+  color: var(--blue-900);
+}
+
+.field-status.recommended {
+  background: var(--amber-100);
+  color: var(--amber-800);
+}
+
+.field-status.optional {
+  background: var(--grey-200);
+  color: var(--grey-700);
+}
+
 .card {
   padding: 22px;
 }
@@ -243,7 +296,8 @@ label {
   margin-bottom: 8px;
 }
 
-select {
+select,
+input {
   width: 100%;
   min-height: 44px;
   border: 1px solid #bac6d4;
@@ -251,6 +305,10 @@ select {
   background: var(--white);
   color: var(--grey-950);
   padding: 0 12px;
+}
+
+input::placeholder {
+  color: #778596;
 }
 
 .selection-description {
@@ -263,6 +321,22 @@ select {
 
 .selection-description p:last-child {
   margin-bottom: 0;
+}
+
+.cumulative-note {
+  border-left: 3px solid var(--blue-800);
+  color: var(--grey-700);
+  margin: 2px 0 16px;
+  padding-left: 10px;
+}
+
+.alpha-symbol {
+  white-space: nowrap;
+}
+
+.alpha-symbol sub {
+  font-size: 0.72em;
+  line-height: 0;
 }
 
 .section-title {
@@ -322,6 +396,12 @@ select {
 .criterion-id {
   color: var(--grey-500);
   font-weight: 750;
+}
+
+.gate-note {
+  color: var(--grey-500);
+  font-size: 0.86rem;
+  margin-bottom: 0;
 }
 
 .rating-list {
@@ -466,6 +546,21 @@ select {
   margin: 6px 0;
 }
 
+.role-check {
+  border-left: 3px solid var(--grey-200);
+  margin-top: 12px;
+  padding: 4px 0 4px 14px;
+}
+
+.role-check h4 {
+  margin-bottom: 6px;
+}
+
+.role-check p,
+.role-check ul {
+  margin-bottom: 0;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -546,6 +641,7 @@ select {
   .header-grid,
   .summary-grid,
   .input-grid,
+  .form-grid,
   .result-grid {
     grid-template-columns: 1fr;
   }

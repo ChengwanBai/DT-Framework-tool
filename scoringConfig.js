@@ -2,13 +2,11 @@ const scoringConfig = {
   metadata: {
     toolkitName: "Bioprocess Digital Twin Deployment Readiness Toolkit",
     frameworkName: "TRL-DRL-α Digital Twin Deployment Framework",
-    version: "1.0.0",
-    lastUpdated: "2026-05-29"
+    version: "2.1.0",
+    lastUpdated: "2026-07-28"
   },
 
-  warnings: [
-    "TODO: Confirm α role thresholds. The uploaded α scoring standard defines 1-5 anchor scores but does not define explicit role-thresholds. This toolkit uses editable default thresholds in scoringConfig.js and surfaces this warning for transparency."
-  ],
+  warnings: [],
 
   trl: {
     sourceNote:
@@ -34,117 +32,76 @@ const scoringConfig = {
           "Analytical or experimental proof-of-concept work has begun to demonstrate feasibility."
       },
       4: {
-        label: "Technology validated in lab",
+        label: "Integrated bioprocess DT validated in laboratory conditions",
         description:
-          "Components or processes have been validated in a laboratory environment."
+          "The integrated sensing, data pipeline, model, and intended interface have been validated together using laboratory bioprocess equipment or representative experimental data."
       },
       5: {
-        label: "Technology validated in relevant environment",
+        label: "Integrated bioprocess DT validated in a relevant environment",
         description:
-          "The technology has been validated in a relevant environment that approximates intended use."
+          "The integrated digital twin has been validated at bench or pilot scale using relevant biological matrices, process variability, and operating conditions."
       },
       6: {
-        label: "Technology demonstrated in relevant environment",
+        label: "Integrated bioprocess DT demonstrated in a relevant environment",
         description:
-          "A prototype or representative model has been demonstrated in a relevant environment."
+          "A representative digital twin prototype has operated with an integrated bioprocess system at bench or pilot scale under conditions that approximate the intended application."
       },
       7: {
-        label: "System prototype demonstration in operational environment",
+        label: "Bioprocess DT prototype demonstrated operationally",
         description:
-          "A system prototype has been demonstrated in an operational environment."
+          "The integrated prototype has been demonstrated with an operational bioprocess, including the intended data flows, update cycle, users, and operating constraints."
       },
       8: {
-        label: "System complete and qualified",
+        label: "Bioprocess DT system complete and qualified",
         description:
-          "The system is complete, qualified, and ready for operational deployment under defined conditions."
+          "The complete digital twin system and its operational interfaces have been qualified for use within a defined bioprocess operating envelope."
       },
       9: {
-        label: "Actual system proven in operational environment",
+        label: "Bioprocess DT proven in routine operation",
         description:
-          "The actual system has been proven in operational use under expected conditions."
+          "The complete digital twin has demonstrated sustained, routine operational use across the expected bioprocess conditions and decision cycles."
       }
     }
   },
 
   drl: {
-    sourceNote: "Based only on the user-uploaded DRL scoring standard.",
-    levels: {
-      1: {
-        band: "Band C (C4)",
-        label: "Unverified existence",
-        description: "Data are believed to exist but remain unconfirmed.",
-        primaryDimension: "Accessibility"
-      },
-      2: {
-        band: "Band C (C3)",
-        label: "Existence confirmed",
-        description: "Data exist but are not yet accessible.",
-        primaryDimension: "Accessibility"
-      },
-      3: {
-        band: "Band C (C2)",
-        label: "Partial accessibility",
+    sourceNote: "Band-based data-readiness classification supplied in the operational framework.",
+    bands: {
+      C: {
+        label: "Band C",
+        shortLabel: "Accessible data foundation",
         description:
-          "Data are retrievable in principle but constrained by legal, ethical, or ownership barriers.",
-        primaryDimension: "Accessibility"
+          "Data existence, accessibility, machine readability, and basic governance clearance are established. Band C confirms that a usable data foundation exists, but does not establish sufficient quality or task fitness for assigning a digital twin role ceiling.",
+        primaryDimension: "Availability and accessibility",
+        maximumRole: null,
+        includes: [],
+        cumulativeNote: "Foundation band; no lower band is required."
       },
-      4: {
-        band: "Band C (C1)",
-        label: "Machine-readable",
+      B: {
+        label: "Band B",
+        shortLabel: "Quality-assured data",
         description:
-          "Data are accessible in machine-readable form with basic governance clearance.",
-        primaryDimension: "Accessibility"
+          "All Band C conditions are met, and data quality, consistency, traceability, continuity, and representativeness have been demonstrated sufficiently for the assessed task. Band B can support R1 or R2 when the relevant task and alignment requirements are met.",
+        primaryDimension: "Data quality",
+        maximumRole: "R2",
+        includes: ["C"],
+        cumulativeNote: "Cumulative: includes every Band C requirement."
       },
-      5: {
-        band: "Band B (B4-B3)",
-        label: "Initial cleaning",
+      A: {
+        label: "Band A",
+        shortLabel: "Task-ready",
         description:
-          "Major errors, missingness, and inconsistencies have been identified and partly addressed.",
-        primaryDimension: "Data quality"
-      },
-      6: {
-        band: "Band B (B2)",
-        label: "Quality improvement",
-        description:
-          "Data are largely cleaned and standardised, with improving consistency and sufficient continuity for preliminary analysis.",
-        primaryDimension: "Data quality"
-      },
-      7: {
-        band: "Band B (B1)",
-        label: "Faithfulness achieved",
-        description:
-          "Data are reliable, traceable, and sufficiently representative of the main operating conditions, with documented limitations.",
-        primaryDimension: "Data quality"
-      },
-      8: {
-        band: "Band A (A4-A2)",
-        label: "Contextual relevance",
-        description:
-          "Data are linked to a defined modelling or decision task, although coverage or depth may still be incomplete.",
-        primaryDimension: "Task fitness"
-      },
-      9: {
-        band: "Band A (A1)",
-        label: "Task-ready",
-        description:
-          "Data are sufficient in volume, coverage, and temporal depth for the intended task and suitable for operational use.",
-        primaryDimension: "Task fitness"
+          "All Band B and Band C conditions are met, and the data have demonstrated contextual relevance, sufficient coverage and temporal depth, and fitness for the specified modelling or decision task and operating envelope. Band A allows R3 to be considered when all applicable alignment requirements are met.",
+        primaryDimension: "Task fitness",
+        maximumRole: "R3",
+        includes: ["B", "C"],
+        cumulativeNote: "Cumulative: includes every Band B and Band C requirement."
       }
     }
   },
 
   alpha: {
     sourceNote: "Based only on the user-uploaded α scoring standard.",
-    thresholds: {
-      weakBelow: 2.5,
-      strongAtOrAbove: 3.25,
-      note:
-        "TODO: Confirm before publication. Editable default. The uploaded α file gives 1-5 scoring anchors but no weak/moderate/strong role thresholds. These defaults follow the threshold values requested in the project brief and should be reviewed if the framework publication specifies different 1-5 thresholds."
-    },
-    criticalCriteria: {
-      R2: ["TD1", "DM1", "DM2"],
-      R3: ["TD1", "MT1", "MT2"]
-    },
     TD: {
       title: "Technology-Data alignment",
       shortDefinition:
@@ -192,7 +149,7 @@ const scoringConfig = {
       criteria: [
         {
           id: "DM1",
-          label: "Representational alignment",
+          label: "Measurement–model correspondence",
           options: [
             { score: 1, description: "Measured variables do not map to model quantities/targets; modelling is constrained at the variable level." },
             { score: 2, description: "Mapping exists but is unstable or weakly justified; heavy ad hoc feature engineering is required." },
@@ -203,7 +160,7 @@ const scoringConfig = {
         },
         {
           id: "DM2",
-          label: "Temporal-structure alignment",
+          label: "Granularity and synchronisation",
           options: [
             { score: 1, description: "Multi-rate streams are too asynchronous/fragmented; trajectories are largely reconstructed." },
             { score: 2, description: "Alignment relies on extensive interpolation/resampling; physical consistency is uncertain." },
@@ -214,7 +171,7 @@ const scoringConfig = {
         },
         {
           id: "DM3",
-          label: "Coverage + structural/semantic consistency",
+          label: "Operating-domain and data-structure coverage",
           options: [
             { score: 1, description: "Data cover a narrow region (few recipes/steady states); storage structure conflicts with modelling entities." },
             { score: 2, description: "Partial coverage; identifiers/definitions drift; aggregation masks critical variation." },
@@ -226,13 +183,13 @@ const scoringConfig = {
       ]
     },
     MT: {
-      title: "Model-Task alignment",
+      title: "Model-Technology alignment",
       shortDefinition:
         "Assesses whether the model role, recommended actions, and constraints are compatible with real operational decision mechanisms.",
       criteria: [
         {
           id: "MT1",
-          label: "Role-hierarchy congruence",
+          label: "Decision integration",
           options: [
             { score: 1, description: "Model role is incompatible with actual decision/control layers; outputs cannot enter operational mechanisms." },
             { score: 2, description: "Only episodic/offline use is realistic despite stronger claimed roles." },
@@ -243,7 +200,7 @@ const scoringConfig = {
         },
         {
           id: "MT2",
-          label: "Manipulability & constraints compatibility",
+          label: "Action and constraint compatibility",
           options: [
             { score: 1, description: "Recommended actions rely on non-manipulable variables or violate constraints." },
             { score: 2, description: "Partial compatibility; feasibility depends on unrealistic setpoint changes or ignored limits." },
@@ -257,66 +214,87 @@ const scoringConfig = {
   },
 
   roleDefinitions: {
-    R1: {
-      title: "Offline / open-loop analysis",
+    none: {
+      title: "No role ceiling assigned",
       description:
-        "The digital twin is mainly suitable for retrospective interpretation, offline scenario analysis, design-space exploration, model-based understanding, or non-operational decision support."
+        "The minimum data-readiness or demonstrated-task conditions are not met within the stated assessment boundary."
+    },
+    R1: {
+      title: "Offline analysis and open-loop decision support",
+      description:
+        "The available data and model have demonstrated the specified offline or open-loop task within the assessment boundary."
     },
     R2: {
-      title: "Online monitoring and soft sensing",
+      title: "Online monitoring and operator-supervised support",
       description:
-        "The digital twin is suitable for routine online monitoring, state estimation, near-real-time interpretation, or soft-sensor support, but not necessarily for autonomous intervention or closed-loop control."
+        "The system supports online monitoring or decision support while outputs remain subject to operator review."
     },
     R3: {
-      title: "Advisory or closed-loop use",
+      title: "Automated closed-loop optimisation or control",
       description:
-        "The digital twin is sufficiently aligned with operational tasks to support bounded advisory recommendations, optimisation, or closed-loop intervention within a validated operating envelope and under appropriate governance and safety constraints."
+        "The system supports automated optimisation or control within the specified operating envelope and level of decision authority."
     }
   },
 
   roleRules: {
     notes: [
-      "The role ceiling is primarily determined by α alignment.",
-      "TRL constrains the feasible deployment boundary.",
-      "DRL qualifies the confidence of the assignment.",
-      "The final result is not a simple average of TRL, DRL, and α."
+      "The data-readiness bands are cumulative: Band A includes Bands B and C, and Band B includes Band C.",
+      "R2 uses means calculated from the criteria applicable to the assessed task, together with a minimum score for every applicable criterion.",
+      "R3 requires every applicable criterion to reach the required score; no averaging compensation is allowed.",
+      "TRL records process maturity, scale, and operating conditions; it does not independently change the role in this operational procedure.",
+      "The highest role at or below the stated target that meets every applicable condition is reported."
     ],
-    trlBoundary: {
-      1: { maxRole: "R1", note: "Basic research stage; operational deployment claims are not defensible." },
-      2: { maxRole: "R1", note: "Concept stage; operational deployment claims are not defensible." },
-      3: { maxRole: "R1", note: "Proof-of-concept stage; current role is exploratory." },
-      4: { maxRole: "R1", note: "Laboratory validation supports offline analysis; online deployment remains future potential." },
-      5: { maxRole: "R1", note: "Relevant-environment validation supports offline analysis; early R2 potential should remain qualified." },
-      6: { maxRole: "R2", note: "Relevant-environment demonstration may support early online monitoring if α and DRL are sufficient." },
-      7: { maxRole: "R2", conditionalR3: true, note: "Operational prototype demonstration supports R2; R3 requires strong α and high DRL." },
-      8: { maxRole: "R3", note: "Complete and qualified system can support R2 or R3 if α and DRL are sufficient." },
-      9: { maxRole: "R3", note: "Operationally proven system can support R2 or R3 if α and DRL are sufficient." }
+    bandRank: {
+      C: 1,
+      B: 2,
+      A: 3
     },
-    drlConfidence: {
-      low: { levels: [1, 2, 3, 4], label: "Low confidence", note: "Band C evidence should be interpreted as exploratory or low-confidence." },
-      moderate: { levels: [5, 6, 7], label: "Moderate confidence", note: "Band B evidence can support R1 or R2 with moderate confidence; R3 requires additional validation support." },
-      high: { levels: [8, 9], label: "High confidence", note: "Band A evidence can support R2 or R3 if α and TRL are also sufficient." }
+    minimumBand: {
+      R1: "B",
+      R2: "B",
+      R3: "A"
     },
-    minimumDrlForR3: 8
-  },
-
-  examples: [
-    {
-      name: "Conventional anaerobic digestion",
-      trl: 9,
-      drl: 7,
-      alpha: { TD: 2.67, DM: 2.67, MT: 3.5 },
-      expectedInterpretation: "R2 with bounded advisory potential.",
-      mainLimitingDimensions:
-        "αTD and αDM, especially feedstock variability, spatial representativeness, domain consistency, and data-model coverage."
+    applicableCriteria: {
+      TD: {
+        always: ["TD1"],
+        conditional: {
+          feedstockVariability: "TD2",
+          spatialEffects: "TD3"
+        }
+      },
+      DM: {
+        always: ["DM1", "DM2", "DM3"]
+      },
+      MT: {
+        alwaysFor: ["R3"],
+        conditionalFor: {
+          R2: "operationGuidance"
+        },
+        criteria: ["MT1", "MT2"]
+      }
     },
-    {
-      name: "H2AD / emerging wastewater biotechnology",
-      trl: 6,
-      drl: 5,
-      alpha: { TD: 2.67, DM: 2.33, MT: 3.0 },
-      expectedInterpretation: "R1 with early R2 potential.",
-      mainLimitingDimensions: "TRL, DRL, and αDM."
+    R1: {
+      taskPerformanceRequired: true
+    },
+    R2: {
+      dimensionMinimums: {
+        TD: 3,
+        DM: 3
+      },
+      criterionFloor: 2,
+      conditionalDimensionMinimums: {
+        operationGuidance: {
+          dimension: "MT",
+          minimum: 3
+        }
+      }
+    },
+    R3: {
+      criterionFloor: 4
     }
-  ]
+  }
 };
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = scoringConfig;
+}

@@ -1,163 +1,90 @@
 # Bioprocess Digital Twin Deployment Readiness Toolkit
 
-A GitHub Pages-ready static web toolkit for assessing digital twin deployment readiness in bioprocesses using a TRL-DRL-α framework.
+A static, GitHub Pages-ready tool for operationalising the TRL–DRL–α framework for a specified bioprocess system and digital twin task.
 
-The toolkit estimates the most defensible current digital twin role ceiling. It does not calculate a generic average readiness score.
+The tool reports the highest functional role supported at or below a stated target role. It does not calculate a composite readiness score.
 
-## What the Toolkit Does
+## Assessment workflow
 
-Evaluators select:
+The evaluator:
 
-- Technology Readiness Level (TRL)
-- Data Readiness Level (DRL)
-- αTD, αDM, and αMT sub-criterion ratings
+1. defines the required operational task and target role; system boundary and operating envelope are recommended, while deployment setting, model configuration, and update/decision interval are optional;
+2. assigns the integrated bioprocess digital twin's TRL;
+3. selects the highest cumulative Data Readiness Band fully achieved;
+4. records whether α<sub>TD2</sub>, α<sub>TD3</sub>, and α<sub>MT</sub> are applicable to the role mapping;
+5. scores all eight α criteria from 1–5; and
+6. reviews diagnostic means, role-mapping means, limiting criteria, unmet requirements, and candidate improvement actions.
 
-The page then reports:
+## Cumulative Data Readiness Bands
 
-- selected TRL and description
-- selected DRL, band, and description
-- αTD, αDM, and αMT average scores
-- sub-criterion breakdown
-- limiting dimensions
-- weak sub-criteria
-- confidence level
-- final digital twin role ceiling
-- concise explanation suitable for academic review notes
+- Band C establishes data existence, accessibility, machine readability, and basic governance clearance. It does not support assignment of a role ceiling.
+- Band B includes every Band C requirement and adds demonstrated data quality, consistency, traceability, continuity, and representativeness. It is the minimum for R1 and R2.
+- Band A includes every Band B and Band C requirement and adds contextual relevance, sufficient coverage and temporal depth, and fitness for the specified task and operating envelope. It is the minimum for R3.
 
-## Framework Logic
+## Alignment notation and criteria
 
-The role ceiling is α-driven, TRL-constrained, and DRL-qualified.
+The interface uses α with the interface identifier as a subscript:
 
-- TRL describes technology maturity and the feasible deployment boundary.
-- DRL describes data maturity and the confidence of the role assignment.
-- α describes alignment among technology, data, model, and operational task.
-- The final role ceiling is not a simple average of TRL, DRL, and α.
+- α<sub>TD1</sub>: temporal alignment
+- α<sub>TD2</sub>: feedstock-variability alignment
+- α<sub>TD3</sub>: spatial and operational alignment
+- α<sub>DM1</sub>: measurement–model correspondence
+- α<sub>DM2</sub>: granularity and synchronisation
+- α<sub>DM3</sub>: operating-domain and data-structure coverage
+- α<sub>MT1</sub>: decision integration
+- α<sub>MT2</sub>: action and constraint compatibility
 
-A high-TRL system can still be capped at R1 or R2 if alignment is weak. A low-TRL system with promising alignment should be interpreted as future potential, not as a currently defensible operational deployment.
+Complete diagnostic means are always reported for α<sub>TD</sub>, α<sub>DM</sub>, and α<sub>MT</sub>. Separate role-mapping means are calculated only from criteria applicable to the assessed role and task.
 
-## Readiness Dimensions
+## Role mapping
 
-### TRL
+### R1: Offline analysis and open-loop decision support
 
-TRL uses a 1-9 scale. The definitions in `scoringConfig.js` are based on the European Commission / EIC TRL definitions and cross-checked against NASA's official TRL overview.
+- minimum Band B; and
+- demonstrated performance of the specified offline or open-loop task within the assessment boundary.
 
-Primary source notes:
+No fixed α threshold is applied.
 
-- European Commission / EIC: <https://eic.ec.europa.eu/programme-finder-13_en>
-- NASA: <https://www.nasa.gov/directorates/somd/space-communications-navigation-program/technology-readiness-levels/>
+### R2: Online monitoring and operator-supervised support
 
-### DRL
+- minimum Band B;
+- mean of applicable α<sub>TD</sub> criteria ≥ 3;
+- mean of α<sub>DM1</sub>–α<sub>DM3</sub> ≥ 3; and
+- every applicable criterion ≥ 2.
 
-DRL uses the uploaded DRL scoring standard only. The uploaded file defines Bands C, B, and A:
+α<sub>TD1</sub> is always used. α<sub>TD2</sub> is included when feedstock or material variability can affect the task, and α<sub>TD3</sub> is included when spatial, phase, scale, or unit differences can affect the task.
 
-- Band C: accessibility-oriented readiness
-- Band B: data quality-oriented readiness
-- Band A: task-fitness readiness
+When model outputs guide process operation, the mean of α<sub>MT1</sub>–α<sub>MT2</sub> must also be ≥ 3 and both criteria must be ≥ 2. Otherwise α<sub>MT</sub> remains diagnostic for R2.
 
-### αTD, αDM, and αMT
+### R3: Automated closed-loop optimisation or control
 
-The α scoring criteria use the uploaded α scoring standard only.
+- minimum Band A; and
+- every applicable criterion ≥ 4.
 
-- αTD: Technology-Data alignment
-- αDM: Data-Model alignment
-- αMT: Model-Task alignment
+α<sub>TD1</sub>, α<sub>DM1</sub>–α<sub>DM3</sub>, and α<sub>MT1</sub>–α<sub>MT2</sub> are always applicable. α<sub>TD2</sub> and α<sub>TD3</sub> are added under their respective applicability conditions.
 
-Each α dimension is calculated as the arithmetic mean of its selected sub-criterion scores and rounded to two decimal places.
+Assessment begins with the selected target role. If it is not supported, lower roles are tested in descending order. If R1 is not supported, no role ceiling is assigned.
 
-The uploaded α file defines 1-5 scoring anchors but does not define explicit weak/moderate/strong role thresholds. The editable defaults in `scoringConfig.js` are:
+## TRL interpretation
 
-- score below 2.5: weak alignment
-- score from 2.5 to below 3.25: moderate alignment
-- score 3.25 or above: strong alignment
+TRL 4–9 descriptions are specific to an integrated bioprocess digital twin: sensing, data pipeline, model, operational interface, update cycle, users, and constraints are considered together. TRL records the maturity, assessed scale, and operating conditions; it does not independently raise or lower the functional role in this procedure.
 
-These thresholds are visible in the UI as a configuration warning and should be updated if the formal framework specifies different 1-5 thresholds.
+## Run and test locally
 
-## Digital Twin Role Ceilings
+No build or package installation is required. Open `index.html` directly in a browser.
 
-### R1: Offline / open-loop analysis
-
-The digital twin is mainly suitable for retrospective interpretation, offline scenario analysis, design-space exploration, model-based understanding, or non-operational decision support.
-
-### R2: Online monitoring and soft sensing
-
-The digital twin is suitable for routine online monitoring, state estimation, near-real-time interpretation, or soft-sensor support, but not necessarily for autonomous intervention or closed-loop control.
-
-### R3: Advisory or closed-loop use
-
-The digital twin is sufficiently aligned with operational tasks to support bounded advisory recommendations, optimisation, or closed-loop intervention within a validated operating envelope and under appropriate governance and safety constraints.
-
-## Run Locally
-
-No build step is required.
-
-Open `index.html` directly in a browser:
-
-```text
-index.html
+```sh
+node --test tests/frameworkEngine.test.js
 ```
-
-The toolkit has no backend, database, login system, external API dependency, or paid-service dependency.
-
-## Deploy on GitHub Pages
-
-1. Push the files to a GitHub repository.
-2. Open repository Settings.
-3. Go to Pages.
-4. Select the branch and root folder that contain `index.html`.
-5. Save the Pages configuration.
-
-GitHub Pages will serve the static site directly.
-
-## Edit Scoring Standards
-
-All framework content and role-ceiling rules are in `scoringConfig.js`.
-
-Update this file to:
-
-- revise TRL definitions or source notes
-- update DRL levels, bands, labels, or descriptions
-- edit α sub-criteria and rating anchors
-- adjust α thresholds
-- change critical criteria for R2 or R3
-- revise TRL deployment boundaries
-- revise DRL confidence rules
-
-Do not edit academic scoring standards inside `app.js`. That file should remain focused on rendering, calculation, and user controls.
-
-## Example Cases
-
-### Example 1: Conventional anaerobic digestion
-
-- TRL: 9
-- DRL: 7
-- αTD: 2.67
-- αDM: 2.67
-- αMT: 3.50
-- Expected interpretation: R2 with bounded advisory potential.
-- Main limiting dimensions: αTD and αDM, especially feedstock variability, spatial representativeness, domain consistency, and data-model coverage.
-
-Although the underlying anaerobic digestion technology is mature and data readiness is relatively strong, limitations in technology-data and data-model alignment constrain robust R3 deployment.
-
-### Example 2: H2AD / emerging wastewater biotechnology
-
-- TRL: 6
-- DRL: 5
-- αTD: 2.67
-- αDM: 2.33
-- αMT: 3.00
-- Expected interpretation: R1 with early R2 potential.
-- Main limiting dimensions: TRL, DRL, and αDM.
-
-The technology is demonstrated but not yet mature enough for confident operational digital twin deployment. Data and model alignment are not yet sufficient for routine online monitoring or robust soft sensing.
 
 ## Files
 
-- `index.html`: semantic page structure
-- `styles.css`: responsive academic visual design
-- `app.js`: rendering, calculation, reset, copy, and JSON export logic
-- `scoringConfig.js`: scoring standards and editable role-ceiling rules
-- `README.md`: project documentation
+- `scoringConfig.js`: bioprocess-specific TRL definitions, cumulative data bands, α anchors, and role requirements
+- `frameworkEngine.js`: applicable-criteria, role-mapping mean, diagnostic, and role-ceiling logic
+- `index.html`, `app.js`, and `styles.css`: assessment interface and reporting
+- `tests/frameworkEngine.test.js`: boundary, mean, criterion-floor, and conditional-applicability tests
+- `archive/`: earlier method documents retained for reference but not used as the toolkit's current method basis
 
 ## Disclaimer
 
-This toolkit is a structured academic assessment aid. It does not replace expert engineering judgement, site-specific validation, safety assessment, or regulatory review.
+This toolkit is a structured academic assessment aid. It requires expert judgement, evidence within a clearly stated boundary, site-specific validation, safety assessment, and regulatory review.
