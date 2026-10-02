@@ -20,202 +20,229 @@ function assessment(overrides = {}) {
     applicability: {
       feedstockVariability: false,
       spatialEffects: false,
-      operationGuidance: false
+      recommendedActions: false
     },
     scores: scores(),
     ...overrides
   };
 }
 
-test("Band A and every R3-applicable criterion at 4 support R3", () => {
+function withScores(changes, base = 4) {
+  const result = scores(base);
+  Object.entries(changes).forEach(([id, value]) => {
+    result[id.slice(0, 2)][id] = value;
+  });
+  return result;
+}
+
+function adScenario() {
+  const example = config.workedExample;
+  return {
+    targetRole: example.targetRole,
+    band: example.band,
+    offlineTaskDemonstrated: example.offlineTaskDemonstrated === "yes",
+    applicability: Object.fromEntries(
+      Object.entries(example.applicability).map(([key, value]) => [key, value === "yes"])
+    ),
+    scores: example.scores
+  };
+}
+
+// ---- Table 5: R3 ---------------------------------------------------------
+
+test("R3: Band A and every applicable criterion at 4 support R3", () => {
   const result = engine.evaluateAssessment(config, assessment());
   assert.equal(result.finalRole, "R3");
   assert.equal(result.targetMet, true);
 });
 
-test("Band B cannot support R3 but can support R2", () => {
+test("R3: Band B cannot support R3 but can support R2", () => {
   const result = engine.evaluateAssessment(config, assessment({ band: "B" }));
   assert.equal(result.finalRole, "R2");
   assert.equal(result.targetMet, false);
-  assert.match(result.targetEvaluation.failures[0].message, /requires at least Band A/);
+  assert.equal(result.targetEvaluation.failures[0].type, "band");
+  assert.equal(result.targetEvaluation.failures[0].required, "A");
 });
 
-test("Band C cannot assign any role ceiling", () => {
+test("R3: α_MT2 is always required, even when R2 outputs have no recommended actions", () => {
+  const result = engine.evaluateAssessment(config, assessment({ scores: withScores({ MT2: 3 }) }));
+  assert.equal(result.finalRole, "R2");
+  assert.ok(result.targetEvaluation.failures.some((failure) => failure.criterion === "MT2"));
+});
+
+test("R3: α_TD2 is checked against 4 only when feedstock variability applies", () => {
+  const input = assessment({ scores: withScores({ TD2: 3 }) });
+  assert.equal(engine.evaluateAssessment(config, input).finalRole, "R3");
+
+  input.applicability = { ...input.applicability, feedstockVariability: true };
+  const result = engine.evaluateAssessment(config, input);
+  assert.equal(result.finalRole, "R2");
+  assert.ok(result.targetEvaluation.failures.some((failure) => failure.criterion === "TD2"));
+});
+
+test("R3: dimension means do not compensate for a single criterion below 4", () => {
+  const result = engine.evaluateAssessment(config, assessment({ scores: withScores({ DM1: 5, DM2: 5, DM3: 3 }) }));
+  assert.equal(engine.calculateDimensionMeans(config, withScores({ DM1: 5, DM2: 5, DM3: 3 })).DM, 4.33);
+  assert.equal(result.finalRole, "R2");
+});
+
+// ---- Table 5: R2 ---------------------------------------------------------
+
+test("R2: thresholds are criterion-level (TD1, DM1, DM2, MT1 ≥ 3; DM3 ≥ 2)", () => {
+  const base = { targetRole: "R2", band: "B" };
+  for (const id of ["TD1", "DM1", "DM2", "MT1"]) {
+    const result = engine.evaluateAssessment(config, assessment({ ...base, scores: withScores({ [id]: 2 }) }));
+    assert.equal(result.finalRole, "R1", `${id} = 2 should fail R2`);
+    assert.ok(result.targetEvaluation.failures.some((failure) => failure.criterion === id && failure.required === 3));
+  }
+  const dm3 = engine.evaluateAssessment(config, assessment({ ...base, scores: withScores({ DM3: 2 }) }));
+  assert.equal(dm3.finalRole, "R2");
+  const dm3Fail = engine.evaluateAssessment(config, assessment({ ...base, scores: withScores({ DM3: 1 }) }));
+  assert.equal(dm3Fail.finalRole, "R1");
+});
+
+test("R2: a high dimension mean cannot offset α_DM1 below 3", () => {
+  const selected = withScores({ DM1: 2, DM2: 5, DM3: 5 });
+  const result = engine.evaluateAssessment(config, assessment({ targetRole: "R2", band: "B", scores: selected }));
+  assert.equal(engine.calculateDimensionMeans(config, selected).DM, 4);
+  assert.equal(result.finalRole, "R1");
+});
+
+test("R2: α_TD2 and α_TD3 are not required when their conditions do not apply", () => {
+  const selected = withScores({ TD2: 1, TD3: 1 });
+  const result = engine.evaluateAssessment(config, assessment({ targetRole: "R2", band: "B", scores: selected }));
+  assert.equal(result.finalRole, "R2");
+  assert.deepEqual(
+    result.targetEvaluation.requirements.map((item) => item.id),
+    ["TD1", "DM1", "DM2", "DM3", "MT1"]
+  );
+});
+
+test("R2: applicable α_TD2 and α_TD3 must reach 2", () => {
+  const applicability = { feedstockVariability: true, spatialEffects: true, recommendedActions: false };
+  const pass = engine.evaluateAssessment(
+    config,
+    assessment({ targetRole: "R2", band: "B", applicability, scores: withScores({ TD2: 2, TD3: 2 }) })
+  );
+  assert.equal(pass.finalRole, "R2");
+  const fail = engine.evaluateAssessment(
+    config,
+    assessment({ targetRole: "R2", band: "B", applicability, scores: withScores({ TD3: 1 }) })
+  );
+  assert.equal(fail.finalRole, "R1");
+});
+
+test("R2: α_MT2 ≥ 2 is required only when outputs include recommended actions", () => {
+  const selected = withScores({ MT2: 1 });
+  const noActions = engine.evaluateAssessment(config, assessment({ targetRole: "R2", band: "B", scores: selected }));
+  assert.equal(noActions.finalRole, "R2");
+
+  const withActions = engine.evaluateAssessment(
+    config,
+    assessment({
+      targetRole: "R2",
+      band: "B",
+      applicability: { feedstockVariability: false, spatialEffects: false, recommendedActions: true },
+      scores: selected
+    })
+  );
+  assert.equal(withActions.finalRole, "R1");
+  assert.ok(withActions.targetEvaluation.failures.some((failure) => failure.criterion === "MT2" && failure.required === 2));
+});
+
+test("R2: Band C fails R2 and R1, so no role ceiling is assigned", () => {
   const result = engine.evaluateAssessment(config, assessment({ band: "C" }));
   assert.equal(result.finalRole, "none");
   assert.deepEqual(result.consideredRoles, ["R3", "R2", "R1"]);
 });
 
-test("R2 is downgraded when the alpha_DM mean is 2.67", () => {
-  const selectedScores = scores(4);
-  Object.assign(selectedScores.DM, { DM1: 3, DM2: 3, DM3: 2 });
-  const result = engine.evaluateAssessment(
-    config,
-    assessment({ targetRole: "R2", band: "B", scores: selectedScores })
-  );
+// ---- Table 5: R1 ---------------------------------------------------------
 
-  assert.equal(result.targetEvaluation.roleMappingMeans.DM, 2.67);
-  assert.equal(result.finalRole, "R1");
+test("R1: requires Band B and demonstrated offline task, with no α threshold", () => {
+  const pass = engine.evaluateAssessment(config, assessment({ targetRole: "R1", band: "B", scores: scores(1) }));
+  assert.equal(pass.finalRole, "R1");
+
+  const fail = engine.evaluateAssessment(
+    config,
+    assessment({ targetRole: "R1", band: "B", offlineTaskDemonstrated: false })
+  );
+  assert.equal(fail.finalRole, "none");
+  assert.equal(fail.targetEvaluation.failures[0].type, "task");
 });
 
-test("a criterion at 1 fails R2 even when its applicable dimension mean is 3", () => {
-  const selectedScores = scores(4);
-  Object.assign(selectedScores.TD, { TD1: 1, TD2: 4, TD3: 4 });
-  const input = assessment({
-    targetRole: "R2",
-    band: "B",
-    applicability: {
-      feedstockVariability: true,
-      spatialEffects: true,
-      operationGuidance: false
-    },
-    scores: selectedScores
-  });
-  const result = engine.evaluateAssessment(config, input);
-
-  assert.equal(result.targetEvaluation.roleMappingMeans.TD, 3);
-  assert.equal(result.finalRole, "R1");
-  assert.ok(result.targetEvaluation.failures.some((failure) => failure.criterion === "TD1"));
-});
-
-test("a criterion at 2 can pass R2 when the applicable dimension mean reaches 3", () => {
-  const selectedScores = scores(4);
-  Object.assign(selectedScores.TD, { TD1: 2, TD2: 3, TD3: 4 });
-  const result = engine.evaluateAssessment(
-    config,
-    assessment({
-      targetRole: "R2",
-      band: "B",
-      applicability: {
-        feedstockVariability: true,
-        spatialEffects: true,
-        operationGuidance: false
-      },
-      scores: selectedScores
-    })
-  );
-
-  assert.equal(result.targetEvaluation.roleMappingMeans.TD, 3);
+test("Roles are tested from the target downwards only", () => {
+  const result = engine.evaluateAssessment(config, assessment({ targetRole: "R2" }));
   assert.equal(result.finalRole, "R2");
+  assert.deepEqual(result.consideredRoles, ["R2"]);
 });
 
-test("inapplicable alpha_TD2 and alpha_TD3 do not enter the R2 mean", () => {
-  const selectedScores = scores(4);
-  Object.assign(selectedScores.TD, { TD1: 3, TD2: 1, TD3: 1 });
-  const input = assessment({ targetRole: "R2", band: "B", scores: selectedScores });
-  const result = engine.evaluateAssessment(config, input);
+// ---- Section 4.3: descriptive means and limiting criteria ------------------
 
-  assert.deepEqual(result.targetEvaluation.applicableCriteria.TD, ["TD1"]);
-  assert.equal(result.targetEvaluation.roleMappingMeans.TD, 3);
-  assert.equal(result.finalRole, "R2");
+test("Dimension means use all criteria in each dimension (Equation 1)", () => {
+  const means = engine.calculateDimensionMeans(config, withScores({ TD2: 1, TD3: 1, MT2: 2 }));
+  assert.equal(means.TD, 2);
+  assert.equal(means.DM, 4);
+  assert.equal(means.MT, 3);
 });
 
-test("alpha_MT does not constrain R2 when operation guidance is false", () => {
-  const selectedScores = scores(4);
-  Object.assign(selectedScores.MT, { MT1: 1, MT2: 1 });
-  const result = engine.evaluateAssessment(
+test("Limiting criteria use only criteria required for the target role", () => {
+  const selected = withScores({ TD2: 1, DM3: 2, MT2: 1 });
+  const limits = engine.findLimitingCriteria(
     config,
-    assessment({ targetRole: "R2", band: "B", scores: selectedScores })
+    "R2",
+    { feedstockVariability: false, spatialEffects: false, recommendedActions: false },
+    selected
   );
+  const ids = limits.map((item) => item.criterion);
+  assert.ok(!ids.includes("TD2"), "inapplicable α_TD2 is not limiting");
+  assert.ok(!ids.includes("MT2"), "α_MT2 is not required for R2 without recommended actions");
+  assert.ok(ids.includes("DM3"));
+  assert.ok(ids.includes("TD1"));
+  assert.ok(ids.includes("MT1"));
+});
 
-  assert.deepEqual(result.targetEvaluation.applicableCriteria.MT, []);
-  assert.equal(result.targetEvaluation.roleMappingMeans.MT, null);
+test("R1 target has no limiting α criteria", () => {
+  const limits = engine.findLimitingCriteria(config, "R1", {}, scores(2));
+  assert.deepEqual(limits, []);
+});
+
+// ---- Section 5: full-scale anaerobic digestion reference scenario ---------
+
+test("AD scenario (Table 6): TRL 9, Band B and the Table 6 scores give an R2 ceiling", () => {
+  const result = engine.evaluateAssessment(config, adScenario());
+  assert.equal(result.targetRole, "R3");
   assert.equal(result.finalRole, "R2");
+  assert.deepEqual(result.consideredRoles, ["R3", "R2"]);
 });
 
-test("alpha_MT must average at least 3 when operation guidance applies to R2", () => {
-  const selectedScores = scores(4);
-  Object.assign(selectedScores.MT, { MT1: 2, MT2: 3 });
-  const result = engine.evaluateAssessment(
-    config,
-    assessment({
-      targetRole: "R2",
-      band: "B",
-      applicability: {
-        feedstockVariability: false,
-        spatialEffects: false,
-        operationGuidance: true
-      },
-      scores: selectedScores
-    })
+test("AD scenario: means are 2.7, 2.7 and 3.5 (Section 5.1)", () => {
+  const means = engine.calculateDimensionMeans(config, config.workedExample.scores);
+  assert.equal(means.TD.toFixed(1), "2.7");
+  assert.equal(means.DM.toFixed(1), "2.7");
+  assert.equal(means.MT.toFixed(1), "3.5");
+});
+
+test("AD scenario: limiting criteria are α_TD2, α_TD3, α_DM3 and α_MT2 (Table 6 asterisks)", () => {
+  const input = adScenario();
+  const limits = engine.findLimitingCriteria(config, input.targetRole, input.applicability, input.scores);
+  assert.deepEqual(limits.map((item) => item.criterion), ["TD2", "TD3", "DM3", "MT2"]);
+});
+
+test("AD scenario: five criteria meet R2 exactly; R3 needs six criteria and Band A (Section 5.2)", () => {
+  const evaluation = engine.evaluateAssessment(config, adScenario());
+  const margins = engine.thresholdMargins(evaluation);
+  assert.deepEqual(margins.atThreshold.map((item) => item.criterion), ["TD2", "TD3", "DM1", "DM2", "DM3"]);
+  assert.equal(margins.nextRole, "R3");
+  assert.equal(margins.nextRoleCriterionCount, 6);
+  assert.equal(margins.nextRoleNeedsBand, "A");
+});
+
+test("AD scenario: deployment constraints cover the DRL band and six criteria", () => {
+  const evaluation = engine.evaluateAssessment(config, adScenario());
+  const constraints = engine.deploymentConstraints(config, evaluation);
+  assert.deepEqual(
+    constraints.map((item) => item.key),
+    ["band-A", "TD2", "TD3", "DM1", "DM2", "DM3", "MT2"]
   );
-
-  assert.equal(result.targetEvaluation.roleMappingMeans.MT, 2.5);
-  assert.equal(result.finalRole, "R1");
-  assert.ok(result.targetEvaluation.failures.some((failure) => failure.type === "dimensionMean"));
-});
-
-test("alpha_MT scores 2 and 4 pass R2 when operation guidance applies", () => {
-  const selectedScores = scores(4);
-  Object.assign(selectedScores.MT, { MT1: 2, MT2: 4 });
-  const result = engine.evaluateAssessment(
-    config,
-    assessment({
-      targetRole: "R2",
-      band: "B",
-      applicability: {
-        feedstockVariability: false,
-        spatialEffects: false,
-        operationGuidance: true
-      },
-      scores: selectedScores
-    })
-  );
-
-  assert.equal(result.targetEvaluation.roleMappingMeans.MT, 3);
-  assert.equal(result.finalRole, "R2");
-});
-
-test("R3 always checks alpha_MT1 and alpha_MT2", () => {
-  const selectedScores = scores(4);
-  selectedScores.MT.MT1 = 3;
-  const result = engine.evaluateAssessment(config, assessment({ scores: selectedScores }));
-
-  assert.equal(result.finalRole, "R2");
-  assert.ok(result.targetEvaluation.failures.some((failure) => failure.criterion === "MT1"));
-});
-
-test("R3 checks conditional alpha_TD2 when feedstock variability applies", () => {
-  const selectedScores = scores(4);
-  selectedScores.TD.TD2 = 3;
-  const result = engine.evaluateAssessment(
-    config,
-    assessment({
-      applicability: {
-        feedstockVariability: true,
-        spatialEffects: false,
-        operationGuidance: false
-      },
-      scores: selectedScores
-    })
-  );
-
-  assert.equal(result.finalRole, "R2");
-  assert.ok(result.targetEvaluation.failures.some((failure) => failure.criterion === "TD2"));
-});
-
-test("R1 requires demonstrated task performance and at least Band B", () => {
-  const result = engine.evaluateAssessment(
-    config,
-    assessment({
-      targetRole: "R1",
-      band: "B",
-      offlineTaskDemonstrated: false
-    })
-  );
-  assert.equal(result.finalRole, "none");
-  assert.equal(result.targetEvaluation.failures[0].type, "task");
-});
-
-test("diagnostic limiting criteria use all eight scored criteria", () => {
-  const selectedScores = scores(5);
-  selectedScores.TD.TD2 = 1;
-  selectedScores.DM.DM1 = 3;
-  selectedScores.DM.DM2 = 3;
-  const limits = engine.findDiagnosticLimitingCriteria(config, selectedScores);
-  const identifiers = limits.map((item) => item.criterion);
-
-  assert.ok(identifiers.includes("TD2"));
-  assert.ok(identifiers.includes("DM1"));
-  assert.ok(identifiers.includes("DM2"));
+  assert.ok(constraints.every((item) => item.action.length > 0));
 });
