@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this toolkit, please cite it using the metadata below."
+type: software
+title: "Bioprocess Digital Twin Deployment Readiness Toolkit"
+version: 3.0.0
+date-released: 2026-10-08
+abstract: >-
+  Browser-based toolkit implementing the role-based TRL–DRL–α framework.
+  It identifies the highest operational role (R1–R3) a digital twin can
+  support for a biomanufacturing system within a defined boundary and
+  deployment context, and reports every unmet requirement as a
+  deployment constraint.
+authors:
+  - family-names: Bai
+    given-names: Chengwan
+    affiliation: "University of Nottingham"
+    orcid: "https://orcid.org/0009-0001-5009-1946"
+  - family-names: Gomes
+    given-names: Rachel L.
+    affiliation: "University of Nottingham"
+    orcid: "https://orcid.org/0000-0003-4284-1740"
+  - family-names: Fisher
+    given-names: Oliver J.
+    affiliation: "University of Nottingham"
+    email: Oliver.Fisher2@nottingham.ac.uk
+    orcid: "https://orcid.org/0000-0002-1158-6751"
+license: MIT
+url: "https://chengwanbai.github.io/DT-Framework-tool/"
+keywords:
+  - digital twin
+  - biomanufacturing
+  - deployment readiness
